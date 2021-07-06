@@ -35,8 +35,8 @@ class DatePrefix(object):
         self.text: Optional[str] = None
         if self.dt is not None and self.precision != Precision.EMPTY:
             self.dt = self.dt
-            if self.dt.tzinfo is not None:
-                self.dt = self.dt.astimezone(timezone.utc).replace(tzinfo=None)
+            if self.dt.tzinfo is not None and self.dt.tzinfo != timezone.utc:
+                self.dt = self.dt.astimezone(timezone.utc)
             self.text = self.dt.isoformat()[: self.precision.value]
 
     def _parse(
