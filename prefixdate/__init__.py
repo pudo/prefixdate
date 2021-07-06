@@ -30,4 +30,4 @@ def parse_parts(
 
 
 __all__ = ["DatePrefix", "Precision", "parse", "parse_parts", "normalize_date"]
-__version__ = "0.1.1"
+__version__ = "0.1.2"
