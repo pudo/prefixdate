@@ -6,7 +6,7 @@ with open("README.md") as f:
 
 setup(
     name="prefixdate",
-    version="0.3.0",
+    version="0.3.1",
     description="Formatting utility for international postal addresses",
     long_description=long_description,
     long_description_content_type="text/markdown",
