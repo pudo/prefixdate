@@ -1,7 +1,10 @@
 import re
+from typing import cast, Union, Optional, Match
 from datetime import datetime, date, timedelta, timezone
 
 from prefixdate.precision import Precision
+
+Raw = Union[None, str, date, datetime, int]
 
 REGEX = re.compile(
     r"^((?P<year>[12]\d{3})"
@@ -24,18 +27,17 @@ class DatePrefix(object):
 
     __slots__ = ["precision", "dt", "text"]
 
-    def __init__(self, raw, precision=Precision.FULL):
+    def __init__(self, raw: Raw, precision: Precision = Precision.FULL):
         self.precision = precision
-        self.dt = self._parse(raw)
-        if self.dt is None or self.precision == Precision.EMPTY:
-            self.text = None
-        else:
+        self.dt: Optional[datetime] = self._parse(raw)
+        self.text: Optional[str] = None
+        if self.dt is not None and self.precision != Precision.EMPTY:
             utc_dt = self.dt.astimezone(timezone.utc)
             self.text = utc_dt.isoformat()[: self.precision.value]
 
-    def _parse(self, raw):
+    def _parse(self, raw: Raw) -> Optional[datetime]:
         try:
-            match = REGEX.match(raw)
+            match = REGEX.match(raw)  # type: ignore
         except TypeError:
             if isinstance(raw, datetime):
                 return raw
@@ -44,6 +46,8 @@ class DatePrefix(object):
             if isinstance(raw, int):
                 if 1000 < raw < 9999:
                     return self._parse(str(raw))
+            return None
+        if match is None:
             return None
         year = self._extract(match, "year", Precision.EMPTY)
         month = self._extract(match, "month", Precision.YEAR)
@@ -64,7 +68,9 @@ class DatePrefix(object):
         except ValueError:
             return None
 
-    def _extract(self, match, group, precision):
+    def _extract(
+        self, match: Match[str], group: str, precision: Precision
+    ) -> Optional[int]:
         try:
             value = int(match.group(group))
             if value > 0:
@@ -73,8 +79,9 @@ class DatePrefix(object):
             pass
         pval = min(self.precision.value, precision.value)
         self.precision = Precision(pval)
+        return None
 
-    def _tzinfo(self, match):
+    def _tzinfo(self, match: Match[str]) -> timezone:
         """Parse the time zone information from a datetime string."""
         # This is probably a bit rough-and-ready, there are good libraries
         # for this. Do we want to depend on one of them?
@@ -88,8 +95,8 @@ class DatePrefix(object):
             pass
         return timezone.utc
 
-    def __str__(self):
-        return self.text
+    def __str__(self) -> str:
+        return self.text or ""
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return "<DatePrefix(%r, %r)>" % (self.text, self.precision)

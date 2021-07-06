@@ -1,28 +1,31 @@
-from prefixdate.parse import DatePrefix
+from typing import Optional, Union
+from prefixdate.parse import DatePrefix, Raw
 from prefixdate.precision import Precision
 
+Part = Union[None, str, int]
 
-def parse(raw, precision=Precision.FULL):
-    """Parse the given input date string and return a `PrefixDate` object
+
+def parse(raw: Raw, precision: Precision = Precision.FULL) -> DatePrefix:
+    """Parse the given input date string and return a `DatePrefix` object
     that holds a datetime, text version and the precision of the date."""
     return DatePrefix(raw, precision=precision)
 
 
-def normalize_date(raw, precision=Precision.FULL):
+def normalize_date(raw: Raw, precision: Precision = Precision.FULL) -> Optional[str]:
     """Take the given input date string and parse it into the normalised
     format to the precision given as an argument."""
     return parse(raw, precision=precision).text
 
 
 def parse_parts(
-    year=None,
-    month=None,
-    day=None,
-    hour=None,
-    minute=None,
-    second=None,
-    precision=Precision.FULL,
-):
+    year: Part = None,
+    month: Part = None,
+    day: Part = None,
+    hour: Part = None,
+    minute: Part = None,
+    second: Part = None,
+    precision: Precision = Precision.FULL,
+) -> DatePrefix:
     """Try to build a date prefix from the date components as given until
     one of them is null."""
     raw = f"{year}-{month}-{day}T{hour}:{minute}:{second}"

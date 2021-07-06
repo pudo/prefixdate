@@ -14,7 +14,6 @@ setup(
     author="Friedrich Lindenberg",
     author_email="friedrich@pudo.org",
     license="MIT",
-    include_package_data=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -26,12 +25,16 @@ setup(
     ],
     keywords="date, partial date, iso8601, rfc3339",
     packages=["prefixdate"],
+    package_data={"prefixdate": ["py.typed"]},
+    include_package_data=True,
     scripts=[],
     install_requires=[],
+    zip_safe=False,
     extras_require={
         "dev": [
             "pytest",
             "pytest-cov",
+            "mypy",
             "bump2version",
             "wheel>=0.29.0",
             "twine",
