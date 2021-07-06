@@ -53,6 +53,17 @@ normalize_date(datetime.date())
 normalize_date(None)
 ```
 
+You can also use the `parse_parts` helper, which is similar to the constructor
+for a `datetime`:
+
+```python
+from prefixdate import parse_parts, Precision
+
+date = parse_parts(2001, '3', None)
+assert date.precision == Precision.MONTH
+assert date.text == '2001-03'
+```
+
 ## Caveats
 
 * Does not process milliseconds yet.
