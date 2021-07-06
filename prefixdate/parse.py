@@ -34,10 +34,10 @@ class DatePrefix(object):
         self.precision, self.dt = self._parse(raw, precision)
         self.text: Optional[str] = None
         if self.dt is not None and self.precision != Precision.EMPTY:
-            dt = self.dt
-            if dt.tzinfo is not None:
-                dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
-            self.text = dt.isoformat()[: self.precision.value]
+            self.dt = self.dt
+            if self.dt.tzinfo is not None:
+                self.dt = self.dt.astimezone(timezone.utc).replace(tzinfo=None)
+            self.text = self.dt.isoformat()[: self.precision.value]
 
     def _parse(
         self, raw: Raw, precision: Precision
@@ -86,8 +86,7 @@ class DatePrefix(object):
                 return (precision, value)
         except (ValueError, TypeError, AttributeError):
             pass
-        pval = min(precision.value, fail.value)
-        return (Precision(pval), None)
+        return (Precision(min(precision.value, fail.value)), None)
 
     def _tzinfo(self, match: Match[str]) -> Optional[timezone]:
         """Parse the time zone information from a datetime string."""

@@ -29,7 +29,7 @@ def test_normalize():
     assert prefix.text == text
     assert prefix.precision == Precision.SECOND
 
-    now = datetime.utcnow().astimezone(timezone.utc)
+    now = datetime.utcnow()
     assert parse(now).dt == now
     assert parse(now.date()).text == now.date().isoformat()
     assert str(parse(2001)) == "2001"
