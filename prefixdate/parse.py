@@ -1,10 +1,13 @@
 import re
+import logging
 from typing import cast, Union, Optional, Match
 from datetime import datetime, date, timedelta, timezone
 
 from prefixdate.precision import Precision
 
-Raw = Union[None, str, date, datetime, int]
+log = logging.getLogger(__name__)
+
+Raw = Union[None, str, date, datetime, int, "DatePrefix"]
 
 REGEX = re.compile(
     r"^((?P<year>[12]\d{3})"
@@ -37,7 +40,7 @@ class DatePrefix(object):
 
     def _parse(self, raw: Raw) -> Optional[datetime]:
         try:
-            match = REGEX.match(raw)  # type: ignore
+            match = cast(Match[str], REGEX.match(raw))  # type: ignore
         except TypeError:
             if isinstance(raw, datetime):
                 return raw
@@ -46,8 +49,10 @@ class DatePrefix(object):
             if isinstance(raw, int):
                 if 1000 < raw < 9999:
                     return self._parse(str(raw))
-            return None
-        if match is None:
+            if isinstance(raw, DatePrefix):
+                self.precision = raw.precision
+                return raw.dt
+            log.debug("Date value is invalid: %s", raw)
             return None
         year = self._extract(match, "year", Precision.EMPTY)
         month = self._extract(match, "month", Precision.YEAR)
@@ -66,6 +71,7 @@ class DatePrefix(object):
                 tzinfo=self._tzinfo(match),
             )
         except ValueError:
+            log.debug("Date string is semantically invalid: %s", raw)
             return None
 
     def _extract(
@@ -94,6 +100,9 @@ class DatePrefix(object):
         except (ValueError, TypeError, AttributeError):
             pass
         return timezone.utc
+
+    def __eq__(self, other: object) -> bool:
+        return str(self) == str(other)
 
     def __str__(self) -> str:
         return self.text or ""

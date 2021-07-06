@@ -27,6 +27,11 @@ def test_normalize():
     assert str(parse(2001)) == "2001"
     assert repr(parse(2001)) == "<DatePrefix('2001', %r)>" % Precision.YEAR
 
+    # feed a prefix to parse:
+    prefix = parse(now)
+    out = parse(prefix)
+    assert out == prefix
+
 
 def test_parse_parts():
     assert parse_parts(year=None).text is None
