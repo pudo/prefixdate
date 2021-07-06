@@ -11,13 +11,13 @@ Raw = Union[None, str, date, datetime, int, "DatePrefix"]
 
 REGEX = re.compile(
     r"^((?P<year>[12]\d{3})"
-    r"(-(?P<month>[01]?[0-9])"
-    r"(-(?P<day>[0123]?[0-9])"
+    r"(-(?P<month>\d{1,2})"
+    r"(-(?P<day>\d{1,2})"
     r"([T ]"
-    r"((?P<hour>[012]?\d)"
+    r"((?P<hour>\d{1,2})"
     r"(:(?P<minute>\d{1,2})"
     r"(:(?P<second>\d{1,2})"
-    r"(\.\d{6})?"
+    r"(\.\d{4,6})?"
     r"(Z|(?P<tzsign>[-+])(?P<tzhour>\d{2})(:?(?P<tzminute>\d{2}))"
     r"?)?)?)?)?)?)?)?)?.*"
 )
@@ -34,8 +34,10 @@ class DatePrefix(object):
         self.precision, self.dt = self._parse(raw, precision)
         self.text: Optional[str] = None
         if self.dt is not None and self.precision != Precision.EMPTY:
-            utc_dt = self.dt.astimezone(timezone.utc)
-            self.text = utc_dt.isoformat()[: self.precision.value]
+            dt = self.dt
+            if dt.tzinfo is not None:
+                dt = dt.astimezone(timezone.utc).replace(tzinfo=None)
+            self.text = dt.isoformat()[: self.precision.value]
 
     def _parse(
         self, raw: Raw, precision: Precision
@@ -59,7 +61,7 @@ class DatePrefix(object):
         precision, day = self._extract(match, "day", precision, Precision.MONTH)
         precision, hour = self._extract(match, "hour", precision, Precision.DAY)
         precision, minute = self._extract(match, "minute", precision, Precision.HOUR)
-        precision, second = self._extract(match, "second", precision, Precision.DAY)
+        precision, second = self._extract(match, "second", precision, Precision.MINUTE)
         try:
             dt = datetime(
                 year or 1000,
@@ -87,7 +89,7 @@ class DatePrefix(object):
         pval = min(precision.value, fail.value)
         return (Precision(pval), None)
 
-    def _tzinfo(self, match: Match[str]) -> timezone:
+    def _tzinfo(self, match: Match[str]) -> Optional[timezone]:
         """Parse the time zone information from a datetime string."""
         # This is probably a bit rough-and-ready, there are good libraries
         # for this. Do we want to depend on one of them?
@@ -99,7 +101,7 @@ class DatePrefix(object):
             return timezone(delta)
         except (ValueError, TypeError, AttributeError):
             pass
-        return timezone.utc
+        return None
 
     def __eq__(self, other: object) -> bool:
         return str(self) == str(other)

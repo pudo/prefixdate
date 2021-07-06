@@ -71,7 +71,7 @@ can supply one or many format strings for `datetime.strptime`. The format string
 will be analysed to determine how precise the resulting dates are expected to be.
 
 ```python 
-from prefixdate import parse_format, Precision
+from prefixdate import parse_format, parse_formats, Precision
 
 date = parse_format('YEAR 2021', 'YEAR %Y')
 assert date.precision == Precision.YEAR
@@ -79,8 +79,6 @@ assert date.text == '2021'
 
 # You can try out multiple formats in sequence. The first non-empty prefix
 # will be returned:
-from prefixdate import parse_formats
-
 date = parse_formats('2021', ['%Y-%m-%d', '%Y-%m', '%Y'])
 assert date.precision == Precision.YEAR
 assert date.text == '2021'
@@ -88,5 +86,6 @@ assert date.text == '2021'
 
 ## Caveats
 
+* Datetimes are always converted to UTC and made naive (tzinfo stripped)
 * Does not process milliseconds yet.
 * Does not process invalid dates, like Feb 31st.

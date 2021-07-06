@@ -47,8 +47,6 @@ def parse_format(raw: Raw, format: str) -> DatePrefix:
         return DatePrefix(None, precision=Precision.EMPTY)
     try:
         dt = datetime.strptime(raw, format)
-        if dt.tzinfo is None:
-            dt = dt.replace(tzinfo=timezone.utc)
         precision = format_precision(format)
         return DatePrefix(dt, precision=precision)
     except (ValueError, TypeError):
