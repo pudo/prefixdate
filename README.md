@@ -32,6 +32,11 @@ date = parse(2001)
 assert date.text == '2001'
 assert date.precision == Precision.YEAR
 
+date = parse(None)
+assert date.text is None
+assert date.precision == Precision.EMPTY
+# This will also be the outcome for invalid dates!
+
 # Normalize to a standard string:
 assert normalize_date('2001-1') == '2001-01'
 assert normalize_date('2001-00-00') == '2001'
