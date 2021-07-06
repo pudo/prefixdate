@@ -52,7 +52,7 @@ class DatePrefix(object):
             if isinstance(raw, DatePrefix):
                 self.precision = raw.precision
                 return raw.dt
-            log.debug("Date value is invalid: %s", raw)
+            log.warning("Date value is invalid: %s", raw)
             return None
         year = self._extract(match, "year", Precision.EMPTY)
         month = self._extract(match, "month", Precision.YEAR)
@@ -71,7 +71,7 @@ class DatePrefix(object):
                 tzinfo=self._tzinfo(match),
             )
         except ValueError:
-            log.debug("Date string is semantically invalid: %s", raw)
+            log.warning("Date string is semantically invalid: %s", raw)
             return None
 
     def _extract(
