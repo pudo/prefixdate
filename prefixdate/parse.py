@@ -71,7 +71,7 @@ class DatePrefix(object):
                 tzinfo=self._tzinfo(match),
             )
         except ValueError:
-            log.warning("Date string is semantically invalid: %s", raw)
+            log.warning("Date string is invalid: %s", raw)
             return None
 
     def _extract(
