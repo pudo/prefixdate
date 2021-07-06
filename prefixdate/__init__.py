@@ -1,6 +1,7 @@
 from typing import Optional, Union
 from prefixdate.parse import DatePrefix, Raw
 from prefixdate.precision import Precision
+from prefixdate.formats import parse_format, parse_formats, format_precision
 
 Part = Union[None, str, int]
 
@@ -32,5 +33,14 @@ def parse_parts(
     return parse(raw, precision=precision)
 
 
-__all__ = ["DatePrefix", "Precision", "parse", "parse_parts", "normalize_date"]
+__all__ = [
+    "DatePrefix",
+    "Precision",
+    "parse",
+    "parse_parts",
+    "normalize_date",
+    "parse_format",
+    "parse_formats",
+    "format_precision",
+]
 __version__ = "0.2.2"
