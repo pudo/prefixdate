@@ -1,4 +1,5 @@
-from datetime import datetime, timezone
+import pytest
+from datetime import datetime
 from prefixdate import parse, normalize_date, parse_parts, Precision
 
 
@@ -44,6 +45,9 @@ def test_normalize():
     late = parse("2017-04-09T10:30:29")
     assert early < late
     assert late > early
+
+    with pytest.raises(TypeError):
+        assert late > "banana"
 
     assert hash(late) is not None
 
