@@ -1,5 +1,6 @@
 import re
 import logging
+from functools import total_ordering
 from typing import cast, Union, Optional, Match, Tuple
 from datetime import datetime, date, timedelta, timezone
 
@@ -10,7 +11,7 @@ log = logging.getLogger(__name__)
 Raw = Union[None, str, date, datetime, int, "DatePrefix"]
 
 REGEX = re.compile(
-    r"^((?P<year>[12]\d{3})"
+    r"^\s*((?P<year>[12]\d{3})"
     r"(-(?P<month>\d{1,2})"
     r"(-(?P<day>\d{1,2})"
     r"([T ]"
@@ -23,6 +24,7 @@ REGEX = re.compile(
 )
 
 
+@total_ordering
 class DatePrefix(object):
     """A date that is specified in terms of a value and an additional precision,
     which defines how well specified the date is. A datetime representation is
@@ -105,8 +107,17 @@ class DatePrefix(object):
     def __eq__(self, other: object) -> bool:
         return str(self) == str(other)
 
+    def __lt__(self, other: object) -> bool:
+        # cf. https://docs.python.org/3/library/functools.html#functools.total_ordering
+        if isinstance(other, DatePrefix):
+            return str(self) < str(other)
+        return NotImplemented
+
     def __str__(self) -> str:
         return self.text or ""
 
     def __repr__(self) -> str:
         return "<DatePrefix(%r, %r)>" % (self.text, self.precision)
+
+    def __hash__(self) -> int:
+        return hash(repr(self))

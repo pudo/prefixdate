@@ -40,6 +40,13 @@ def test_normalize():
     out = parse(prefix)
     assert out == prefix
 
+    early = parse("2017-04-04T10:30:29")
+    late = parse("2017-04-09T10:30:29")
+    assert early < late
+    assert late > early
+
+    assert hash(late) is not None
+
 
 def test_parse_parts():
     assert parse_parts(year=None).text is None
