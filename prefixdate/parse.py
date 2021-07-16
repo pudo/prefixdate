@@ -41,16 +41,14 @@ class DatePrefix(object):
                 self.dt = self.dt.astimezone(timezone.utc)
             self.text = self.dt.isoformat()[: self.precision.value]
 
-    def _parse(
-        self, raw: Raw, precision: Precision
-    ) -> Tuple[Precision, Optional[datetime]]:
+    def _parse(self, raw: Raw, pcn: Precision) -> Tuple[Precision, Optional[datetime]]:
         try:
             match = cast(Match[str], REGEX.match(raw))  # type: ignore
         except TypeError:
             if isinstance(raw, datetime):
-                return (precision, raw)
+                return (pcn, raw)
             if isinstance(raw, date):
-                return self._parse(raw.isoformat(), precision)
+                return self._parse(raw.isoformat(), pcn)
             if isinstance(raw, int):
                 if 1000 < raw < 9999:
                     return self._parse(str(raw), Precision.YEAR)
@@ -58,37 +56,36 @@ class DatePrefix(object):
                 return (raw.precision, raw.dt)
             log.warning("Date value is invalid: %s", raw)
             return (Precision.EMPTY, None)
-        precision, year = self._extract(match, "year", precision, Precision.EMPTY)
-        precision, month = self._extract(match, "month", precision, Precision.YEAR)
-        precision, day = self._extract(match, "day", precision, Precision.MONTH)
-        precision, hour = self._extract(match, "hour", precision, Precision.DAY)
-        precision, minute = self._extract(match, "minute", precision, Precision.HOUR)
-        precision, second = self._extract(match, "second", precision, Precision.MINUTE)
+        pcn, year = self._extract(match, "year", 1000, pcn, Precision.EMPTY)
+        pcn, month = self._extract(match, "month", 1, pcn, Precision.YEAR)
+        pcn, day = self._extract(match, "day", 1, pcn, Precision.MONTH)
+        pcn, hour = self._extract(match, "hour", 0, pcn, Precision.DAY)
+        pcn, minute = self._extract(match, "minute", 0, pcn, Precision.HOUR)
+        pcn, second = self._extract(match, "second", 0, pcn, Precision.MINUTE)
         try:
-            dt = datetime(
-                year or 1000,
-                month or 1,
-                day or 1,
-                hour or 0,
-                minute or 0,
-                second or 0,
-                tzinfo=self._tzinfo(match),
-            )
-            return (precision, dt)
+            tz = self._tzinfo(match)
+            dt = datetime(year, month, day, hour, minute, second, tzinfo=tz)
+            return (pcn, dt)
         except ValueError:
             log.warning("Date string is invalid: %s", raw)
             return (Precision.EMPTY, None)
 
     def _extract(
-        self, match: Match[str], group: str, precision: Precision, fail: Precision
-    ) -> Tuple[Precision, Optional[int]]:
+        self,
+        match: Match[str],
+        group: str,
+        lowest: int,
+        pcn: Precision,
+        fail: Precision,
+    ) -> Tuple[Precision, int]:
         try:
             value = int(match.group(group))
-            if value > 0:
-                return (precision, value)
+            if value >= lowest:
+                return (pcn, value)
         except (ValueError, TypeError, AttributeError):
             pass
-        return (Precision(min(precision.value, fail.value)), None)
+        precision = Precision(min(pcn.value, fail.value))
+        return (precision, lowest)
 
     def _tzinfo(self, match: Match[str]) -> Optional[timezone]:
         """Parse the time zone information from a datetime string."""

@@ -22,8 +22,12 @@ def test_normalize():
     text = "2021-07-01T13:43:22.175889-08:45"
     assert normalize_date(text, Precision.MINUTE) == "2021-07-01T22:28"
 
-    text = "2017-5-2T10:00:00"
-    assert normalize_date(text) == "2017-05-02T10"
+    prefix = parse("2017-5-2T10:00:00")
+    assert prefix.text == "2017-05-02T10:00:00"
+    assert prefix == "2017-05-02T10:00:00"
+    assert prefix.precision == Precision.SECOND
+    prefix = parse("2017-5-2T10:00")
+    assert prefix.precision == Precision.MINUTE
 
     text = "2017-04-04T10:30:29"
     prefix = parse(text)
