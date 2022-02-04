@@ -54,7 +54,8 @@ class DatePrefix(object):
                     return self._parse(str(raw), Precision.YEAR)
             if isinstance(raw, DatePrefix):
                 return (raw.precision, raw.dt)
-            log.warning("Date value is invalid: %s", raw)
+            if raw is not None:
+                log.warning("Date value is invalid: %s", raw)
             return (Precision.EMPTY, None)
         pcn, year = self._extract(match, "year", 1000, pcn, Precision.EMPTY)
         pcn, month = self._extract(match, "month", 1, pcn, Precision.YEAR)
