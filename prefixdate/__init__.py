@@ -43,4 +43,4 @@ __all__ = [
     "parse_formats",
     "format_precision",
 ]
-__version__ = "0.4.0"
+__version__ = "0.4.1"
