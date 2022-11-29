@@ -7,7 +7,7 @@ with open("README.md") as f:
 setup(
     name="prefixdate",
     version="0.4.1",
-    description="Formatting utility for international postal addresses",
+    description="Provide partial dates and retain the date precision through processing",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/pudo/prefixdate",
