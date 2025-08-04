@@ -6,6 +6,7 @@ from prefixdate import parse, normalize_date, parse_parts, Precision
 def test_normalize():
     assert normalize_date(None) is None
     assert normalize_date("2001") == "2001"
+    assert normalize_date("27171") is None
     assert normalize_date(2001) == "2001"
     assert normalize_date(201) is None
 

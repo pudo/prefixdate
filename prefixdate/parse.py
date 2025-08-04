@@ -11,15 +11,15 @@ log = logging.getLogger(__name__)
 Raw = Union[None, str, date, datetime, int, "DatePrefix"]
 
 REGEX = re.compile(
-    r"^\s*((?P<year>[12]\d{3})"
-    r"(-(?P<month>\d{1,2})"
+    r"^\s*((?P<year>[12]\d{3}\b)"
+    r"(-(?P<month>\d{1,2}\b)"
     r"(-(?P<day>\d{1,2})"
     r"([T ]"
-    r"((?P<hour>\d{1,2})"
-    r"(:(?P<minute>\d{1,2})"
-    r"(:(?P<second>\d{1,2})"
-    r"(\.\d{4,6})?"
-    r"(Z|(?P<tzsign>[-+])(?P<tzhour>\d{2})(:?(?P<tzminute>\d{2}))"
+    r"((?P<hour>\d{1,2}\b)"
+    r"(:(?P<minute>\d{1,2}\b)"
+    r"(:(?P<second>\d{1,2}\b)"
+    r"(\.\d{4,6}\b)?"
+    r"(Z|(?P<tzsign>[-+])(?P<tzhour>\d{2})(:?(?P<tzminute>\d{2}\b))"
     r"?)?)?)?)?)?)?)?)?.*"
 )
 
