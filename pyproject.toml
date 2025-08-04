@@ -1,0 +1,32 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "prefixdate"
+version = "0.4.1"
+description = "Parse and process date string of varied precision as prefixes in Python."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "Friedrich Lindenberg", email = "friedrich@pudo.org" }]
+classifiers = [
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+keywords = ["date", "partial date", "iso8601", "rfc3339"]
+requires-python = ">=3.9"
+
+[project.urls]
+Homepage = "http://github.com/pudo/prefixdate"
+
+[project.optional-dependencies]
+dev = ["mypy", "build", "wheel", "pytest", "pytest-cov", "bump2version"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["prefixdate"]

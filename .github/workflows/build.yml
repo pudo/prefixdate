@@ -8,14 +8,14 @@ jobs:
     environment: deploy
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.9"
+          python-version: "3.12"
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip setuptools
+          python -m pip install --upgrade pip
           pip install -e ".[dev]"
       - name: Validate type annotations
         run: |
@@ -25,11 +25,9 @@ jobs:
           pytest --cov=prefixdate tests/
       - name: Build a distribution
         run: |
-          python setup.py sdist bdist_wheel
+          python3 -m build --wheel
       - name: Publish to PyPI
         if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
-        uses: pypa/gh-action-pypi-publish@master
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          user: __token__
-          password: ${{ secrets.pypi_password }}
-          packages_dir: dist/
+          skip-existing: true
