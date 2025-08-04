@@ -3,7 +3,7 @@ name: Build and publish
 on: [push]
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
     environment: deploy
 
