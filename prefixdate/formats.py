@@ -2,7 +2,7 @@ import re
 import logging
 from typing import Iterable
 from functools import lru_cache
-from datetime import datetime, date, timezone
+from datetime import datetime, date
 
 from prefixdate.precision import Precision
 from prefixdate.parse import DatePrefix, Raw
