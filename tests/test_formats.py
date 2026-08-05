@@ -1,4 +1,15 @@
-from prefixdate.formats import parse_format, parse_formats, format_precision, Precision
+from datetime import date, datetime
+
+from pytest import raises
+
+from prefixdate.formats import (
+    format_precision,
+    has_two_digit_year,
+    resolve_two_digit_year,
+    parse_format,
+    parse_formats,
+    Precision,
+)
 
 
 def test_format_precision():
@@ -37,3 +48,55 @@ def test_parse_formats():
 
     prefix = parse_formats("2021", ["%Y-%m", "%Y"])
     assert prefix.text == "2021"
+
+
+def test_has_two_digit_year():
+    assert has_two_digit_year("%d-%m-%y")
+    assert has_two_digit_year("%y")
+    assert not has_two_digit_year("%d-%m-%Y")
+    assert not has_two_digit_year("%Y")
+    # A literal percent sign followed by "y" is not a directive.
+    assert not has_two_digit_year("%d %%y")
+
+
+def test_two_digit_year_base():
+    # Without a base year, the fixed strptime window applies.
+    assert parse_format("16-07-68", "%d-%m-%y").text == "2068-07-16"
+
+    # The base year selects the century, and is a year number or a 1 January date.
+    assert parse_format("16-07-68", "%d-%m-%y", 1926).text == "1968-07-16"
+    assert parse_format("16-07-68", "%d-%m-%y", date(1926, 1, 1)).text == "1968-07-16"
+    assert parse_format("16-07-24", "%d-%m-%y", 1926).text == "2024-07-16"
+    assert parse_format("16-07-68", "%d-%m-%y", 2000).text == "2068-07-16"
+
+    # Reduced precision is kept.
+    assert parse_format("07-68", "%m-%y", 1926).text == "1968-07"
+    assert parse_format("68", "%y", 1926).text == "1968"
+
+    # A four-digit year keeps its century.
+    assert parse_format("16-07-1868", "%d-%m-%Y", 1926).text == "1868-07-16"
+
+    # A base year given as a date must be 1 January, because only the year counts.
+    with raises(ValueError):
+        resolve_two_digit_year(datetime(2068, 7, 16), date(1926, 6, 1))
+
+    # 29 February in a year which is not a leap year does not resolve at all:
+    # 1900 does not exist, and guessing another century would hide the problem.
+    assert parse_format("29-02-00", "%d-%m-%y", 1850).text is None
+    with raises(ValueError):
+        resolve_two_digit_year(datetime(2000, 2, 29), 1850)
+
+    # The base year reaches parse_format through parse_formats.
+    prefix = parse_formats("16-07-68", ["%Y-%m-%d", "%d-%m-%y"], 1926)
+    assert prefix.text == "1968-07-16"
+
+
+def test_matched_format():
+    assert parse_formats("2021", ["%Y-%m", "%Y"]).format == "%Y"
+    assert parse_format("2021 bla", "%Y bla").format == "%Y bla"
+
+    # No format applies to a date that did not match, or that was not parsed
+    # from a string.
+    assert parse_format("2021 blubb", "%Y bla").format is None
+    assert parse_formats("2021", ["%Y-%m"]).format is None
+    assert parse_format(date(2021, 1, 10), "%Y%m%d").format is None

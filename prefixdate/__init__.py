@@ -2,6 +2,7 @@ from typing import Optional, Union
 from prefixdate.parse import DatePrefix, Raw
 from prefixdate.precision import Precision
 from prefixdate.formats import parse_format, parse_formats, format_precision
+from prefixdate.formats import has_two_digit_year, resolve_two_digit_year
 
 Part = Union[None, str, int]
 
@@ -42,5 +43,7 @@ __all__ = [
     "parse_format",
     "parse_formats",
     "format_precision",
+    "has_two_digit_year",
+    "resolve_two_digit_year",
 ]
 __version__ = "0.5.0"
