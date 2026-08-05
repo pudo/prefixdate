@@ -1,6 +1,6 @@
 import re
 import logging
-from typing import Iterable
+from typing import Iterable, Optional
 from functools import lru_cache
 from datetime import datetime, date
 
@@ -36,9 +36,35 @@ def format_precision(format: str) -> Precision:
     return Precision.SECOND
 
 
-def parse_format(raw: Raw, format: str) -> DatePrefix:
+@lru_cache(maxsize=1000)
+def has_two_digit_year(format: str) -> bool:
+    """Check if a `datetime.strptime` format string reads the year as two digits."""
+    return "%y" in format.replace("%%", "")
+
+
+def resolve_two_digit_year(dt: datetime, base_year: int) -> datetime:
+    """Read a two-digit year in the 100 years that start at `base_year`. A base
+    year of 1926 means that "68" is 1968 and "24" is 2024.
+
+    `strptime` instead reads 00-68 as 20xx and 69-99 as 19xx, so a date outside of
+    that fixed window ends up in the wrong century.
+
+    Raises `ValueError` if the resolved date does not exist, i.e. 29 February in a
+    year which is not a leap year.
+    """
+    return dt.replace(year=base_year + (dt.year - base_year) % 100)
+
+
+def parse_format(
+    raw: Raw, format: str, two_digit_year_base: Optional[int] = None
+) -> DatePrefix:
     """Parse the given raw input using the supplied format string. The precision of the
-    result is inferred from the format string."""
+    result is inferred from the format string.
+
+    `two_digit_year_base` is the first year of the 100 years that a `%y` format is
+    read in: a base year of 1926 reads "68" as 1968 and "24" as 2024. Without it,
+    `strptime`'s fixed 1969-2068 window applies and a warning is logged.
+    """
     if isinstance(raw, int):
         raw = str(raw)
     elif isinstance(raw, (datetime, date, DatePrefix)):
@@ -48,18 +74,30 @@ def parse_format(raw: Raw, format: str) -> DatePrefix:
     try:
         dt = datetime.strptime(raw, format)
         precision = format_precision(format)
+        if has_two_digit_year(format):
+            if two_digit_year_base is None:
+                log.warning(
+                    "Date %r is parsed with the two-digit year format %s and no "
+                    "base year, so it may be in the wrong century",
+                    raw,
+                    format,
+                )
+            else:
+                dt = resolve_two_digit_year(dt, two_digit_year_base)
         return DatePrefix(dt, precision=precision)
     except (ValueError, TypeError):
-        log.warning("Date %r does not match format %s", raw, format)
+        log.debug("Date %r does not match format %s", raw, format)
     return DatePrefix(None, precision=Precision.EMPTY)
 
 
-def parse_formats(raw: Raw, formats: Iterable[str]) -> DatePrefix:
+def parse_formats(
+    raw: Raw, formats: Iterable[str], two_digit_year_base: Optional[int] = None
+) -> DatePrefix:
     """Run `parse_format` using an iterable of format strings, returning the
     first non-empty result from parsing."""
     prefix = DatePrefix(None, precision=Precision.EMPTY)
     for format in formats:
-        prefix = parse_format(raw, format)
+        prefix = parse_format(raw, format, two_digit_year_base=two_digit_year_base)
         if prefix.precision != Precision.EMPTY:
             return prefix
     return prefix
