@@ -43,20 +43,15 @@ def has_two_digit_year(format: str) -> bool:
 
 
 def resolve_two_digit_year(dt: datetime, base_year: int) -> datetime:
-    """Read the two-digit year of a parsed date as the first year, not before
-    `base_year`, that ends in the same two digits.
+    """Read a two-digit year in the 100 years that start at `base_year`. A base
+    year of 1926 means that "68" is 1968 and "24" is 2024.
 
-    `strptime` reads two-digit years 00-68 as 20xx and 69-99 as 19xx, so a date
-    outside of that fixed window ends up in the wrong century. The base year
-    replaces that window with one the caller chooses.
+    `strptime` instead reads 00-68 as 20xx and 69-99 as 19xx, so a date outside of
+    that fixed window ends up in the wrong century.
 
     Raises `ValueError` if the resolved date does not exist, i.e. 29 February in a
     year which is not a leap year.
     """
-    # "68" with base year 1926 gives 1968, and "24" with base year 1926 gives 2024.
-    # 29 February in a year which is not a leap year raises, rather than moving to
-    # another century: either the base year or the source value is wrong, and only
-    # a human can tell which.
     return dt.replace(year=base_year + (dt.year - base_year) % 100)
 
 
@@ -67,10 +62,9 @@ def parse_format(
     result is inferred from the format string. On success, the format string is set as
     the `format` attribute of the result.
 
-    `two_digit_year_base` is the earliest year a two-digit year may denote. A date
-    parsed by a format that contains `%y` moves into the century that places it in
-    the 100 years from that year, instead of using the fixed 1969-2068 window of
-    `strptime`. Parsing such a format without a base year logs a warning.
+    `two_digit_year_base` is the first year of the 100 years that a `%y` format is
+    read in: a base year of 1926 reads "68" as 1968 and "24" as 2024. Without it,
+    `strptime`'s fixed 1969-2068 window applies and a warning is logged.
     """
     if isinstance(raw, int):
         raw = str(raw)
