@@ -11,7 +11,8 @@ standards including date ranges and calendar-week/day-of-year notations.
 
 ## Installation
 
-Install `prefixdate` using PyPI:
+Install `prefixdate` using PyPI. It requires Python 3.11 or newer and has no
+dependencies:
 
 ```bash
 $ pip install prefixdate
@@ -43,13 +44,13 @@ assert normalize_date('2001-00-00') == '2001'
 assert normalize_date('Boo!') is None
 
 # This also works for datetimes:
-from datetime import datetime
-now = datetime.utcnow().isoformat()
+from datetime import UTC, date, datetime
+now = datetime.now(UTC).isoformat()
 minute = normalize_date(now, precision=Precision.MINUTE)
 
 # You can also feed in None, date and datetime:
-normalize_date(datetime.utcnow())
-normalize_date(datetime.date())
+normalize_date(datetime.now(UTC))
+normalize_date(date.today())
 normalize_date(None)
 ```
 
@@ -84,8 +85,52 @@ assert date.precision == Precision.YEAR
 assert date.text == '2021'
 ```
 
+#### Two-digit years
+
+A `%y` format leaves the century open. `strptime` resolves it in a fixed
+1969-2068 window, so a date outside of that lands in the wrong century. Pass
+`two_digit_year_base` to choose the 100 years to read the year in yourself --
+a base of 1926 covers 1926 to 2025:
+
+```python
+from prefixdate import parse_format
+
+date = parse_format('24-03', '%y-%m', two_digit_year_base=1926)
+assert date.text == '2024-03'
+
+date = parse_format('68-03', '%y-%m', two_digit_year_base=1926)
+assert date.text == '1968-03'
+```
+
+Without a base year the `strptime` window applies and a warning is logged.
+`parse_formats` takes the same argument.
+
+#### Inspecting format strings
+
+The helpers used to analyse formats are public, in case you want to apply the
+same reasoning before parsing:
+
+```python
+from prefixdate import Precision, format_precision, has_two_digit_year
+from prefixdate import resolve_two_digit_year
+from datetime import datetime
+
+# The precision a format string implies:
+assert format_precision('%Y-%m') == Precision.MONTH
+
+# Whether it reads the year as two digits:
+assert has_two_digit_year('%y-%m') is True
+
+# Move an already-parsed date into the century starting at a base year:
+dt = resolve_two_digit_year(datetime(2024, 3, 1), 1926)
+assert dt.year == 2024
+```
+
 ## Caveats
 
-* Datetimes are always converted to UTC and made naive (tzinfo stripped)
-* Does not process milliseconds yet.
+* Datetimes are always converted to UTC. `DatePrefix.dt` keeps its timezone
+  and is aware (`tzinfo=timezone.utc`), while `DatePrefix.text` reads as naive
+  because the UTC offset sits past the precision the text is cut to.
+* Does not process milliseconds yet: fractional seconds are matched, but
+  discarded, so `DatePrefix.dt.microsecond` is always `0`.
 * Does not process invalid dates, like Feb 31st.
