@@ -59,8 +59,7 @@ def parse_format(
     raw: Raw, format: str, two_digit_year_base: Optional[int] = None
 ) -> DatePrefix:
     """Parse the given raw input using the supplied format string. The precision of the
-    result is inferred from the format string. On success, the format string is set as
-    the `format` attribute of the result.
+    result is inferred from the format string.
 
     `two_digit_year_base` is the first year of the 100 years that a `%y` format is
     read in: a base year of 1926 reads "68" as 1968 and "24" as 2024. Without it,
@@ -85,9 +84,7 @@ def parse_format(
                 )
             else:
                 dt = resolve_two_digit_year(dt, two_digit_year_base)
-        prefix = DatePrefix(dt, precision=precision)
-        prefix.format = format
-        return prefix
+        return DatePrefix(dt, precision=precision)
     except (ValueError, TypeError):
         log.debug("Date %r does not match format %s", raw, format)
     return DatePrefix(None, precision=Precision.EMPTY)

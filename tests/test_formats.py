@@ -84,14 +84,3 @@ def test_two_digit_year_base():
     # The base year reaches parse_format through parse_formats.
     prefix = parse_formats("16-07-68", ["%Y-%m-%d", "%d-%m-%y"], 1926)
     assert prefix.text == "1968-07-16"
-
-
-def test_matched_format():
-    assert parse_formats("2021", ["%Y-%m", "%Y"]).format == "%Y"
-    assert parse_format("2021 bla", "%Y bla").format == "%Y bla"
-
-    # No format applies to a date that did not match, or that was not parsed
-    # from a string.
-    assert parse_format("2021 blubb", "%Y bla").format is None
-    assert parse_formats("2021", ["%Y-%m"]).format is None
-    assert parse_format(date(2021, 1, 10), "%Y%m%d").format is None

@@ -30,13 +30,10 @@ class DatePrefix(object):
     which defines how well specified the date is. A datetime representation is
     provided, but it is not aware of the precision aspect."""
 
-    __slots__ = ["precision", "dt", "text", "format"]
+    __slots__ = ["precision", "dt", "text"]
 
     def __init__(self, raw: Raw, precision: Precision = Precision.FULL):
         self.precision, self.dt = self._parse(raw, precision)
-        # The `strptime` format string that produced this date, set by
-        # `parse_format`. It is `None` for any other way of parsing.
-        self.format: Optional[str] = None
         self.text: Optional[str] = None
         if self.dt is not None and self.precision != Precision.EMPTY:
             self.dt = self.dt
