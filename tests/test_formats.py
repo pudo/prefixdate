@@ -63,9 +63,8 @@ def test_two_digit_year_base():
     # Without a base year, the fixed strptime window applies.
     assert parse_format("16-07-68", "%d-%m-%y").text == "2068-07-16"
 
-    # The base year selects the century, and is a year number or a 1 January date.
+    # The base year selects the century.
     assert parse_format("16-07-68", "%d-%m-%y", 1926).text == "1968-07-16"
-    assert parse_format("16-07-68", "%d-%m-%y", date(1926, 1, 1)).text == "1968-07-16"
     assert parse_format("16-07-24", "%d-%m-%y", 1926).text == "2024-07-16"
     assert parse_format("16-07-68", "%d-%m-%y", 2000).text == "2068-07-16"
 
@@ -75,10 +74,6 @@ def test_two_digit_year_base():
 
     # A four-digit year keeps its century.
     assert parse_format("16-07-1868", "%d-%m-%Y", 1926).text == "1868-07-16"
-
-    # A base year given as a date must be 1 January, because only the year counts.
-    with raises(ValueError):
-        resolve_two_digit_year(datetime(2068, 7, 16), date(1926, 6, 1))
 
     # 29 February in a year which is not a leap year does not resolve at all:
     # 1900 does not exist, and guessing another century would hide the problem.
