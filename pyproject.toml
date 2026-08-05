@@ -1,5 +1,5 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling>=1.27"]
 build-backend = "hatchling.build"
 
 [project]
@@ -7,26 +7,47 @@ name = "prefixdate"
 version = "0.5.0"
 description = "Parse and process date string of varied precision as prefixes in Python."
 readme = "README.md"
-license = { text = "MIT" }
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [{ name = "Friedrich Lindenberg", email = "friedrich@pudo.org" }]
 classifiers = [
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 keywords = ["date", "partial date", "iso8601", "rfc3339"]
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 
 [project.urls]
-Homepage = "http://github.com/pudo/prefixdate"
+Homepage = "https://github.com/pudo/prefixdate"
+Repository = "https://github.com/pudo/prefixdate.git"
+Issues = "https://github.com/pudo/prefixdate/issues"
 
 [project.optional-dependencies]
-dev = ["mypy", "build", "wheel", "pytest", "pytest-cov", "bump2version"]
+dev = [
+    "ruff",
+    "mypy",
+    "build",
+    "wheel",
+    "pytest",
+    "pytest-cov",
+    "bump2version",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["prefixdate"]
+
+[tool.ruff.lint]
+# We take ruff's default rule selection as-is, so a ruff upgrade brings in new
+# checks by design. `ignore` records the deliberate exceptions:
+ignore = [
+    # Partial dates are naive by design: a date given to year precision has no
+    # meaningful zone, and `DatePrefix` only converts to UTC when the input
+    # carried an offset. Requiring tz-aware construction here would mean
+    # inventing a zone the input never specified.
+    "DTZ001",
+    "DTZ007",
+]

@@ -1,8 +1,9 @@
-import re
 import logging
+import re
+from datetime import UTC, date, datetime, timedelta, timezone
 from functools import total_ordering
-from typing import cast, Union, Optional, Match, Tuple
-from datetime import datetime, date, timedelta, timezone
+from re import Match
+from typing import Union, cast
 
 from prefixdate.precision import Precision
 
@@ -25,23 +26,23 @@ REGEX = re.compile(
 
 
 @total_ordering
-class DatePrefix(object):
+class DatePrefix:
     """A date that is specified in terms of a value and an additional precision,
     which defines how well specified the date is. A datetime representation is
     provided, but it is not aware of the precision aspect."""
 
-    __slots__ = ["precision", "dt", "text"]
+    __slots__ = ["dt", "precision", "text"]
 
     def __init__(self, raw: Raw, precision: Precision = Precision.FULL):
         self.precision, self.dt = self._parse(raw, precision)
-        self.text: Optional[str] = None
+        self.text: str | None = None
         if self.dt is not None and self.precision != Precision.EMPTY:
             self.dt = self.dt
-            if self.dt.tzinfo is not None and self.dt.tzinfo != timezone.utc:
-                self.dt = self.dt.astimezone(timezone.utc)
+            if self.dt.tzinfo is not None and self.dt.tzinfo != UTC:
+                self.dt = self.dt.astimezone(UTC)
             self.text = self.dt.isoformat()[: self.precision.value]
 
-    def _parse(self, raw: Raw, pcn: Precision) -> Tuple[Precision, Optional[datetime]]:
+    def _parse(self, raw: Raw, pcn: Precision) -> tuple[Precision, datetime | None]:
         try:
             match = cast(Match[str], REGEX.match(raw))  # type: ignore
         except TypeError:
@@ -49,9 +50,8 @@ class DatePrefix(object):
                 return (pcn, raw)
             if isinstance(raw, date):
                 return self._parse(raw.isoformat(), pcn)
-            if isinstance(raw, int):
-                if 1000 < raw < 9999:
-                    return self._parse(str(raw), Precision.YEAR)
+            if isinstance(raw, int) and 1000 < raw < 9999:
+                return self._parse(str(raw), Precision.YEAR)
             if isinstance(raw, DatePrefix):
                 return (raw.precision, raw.dt)
             if raw is not None:
@@ -78,7 +78,7 @@ class DatePrefix(object):
         lowest: int,
         pcn: Precision,
         fail: Precision,
-    ) -> Tuple[Precision, int]:
+    ) -> tuple[Precision, int]:
         try:
             value = int(match.group(group))
             if value >= lowest:
@@ -88,7 +88,7 @@ class DatePrefix(object):
         precision = Precision(min(pcn.value, fail.value))
         return (precision, lowest)
 
-    def _tzinfo(self, match: Match[str]) -> Optional[timezone]:
+    def _tzinfo(self, match: Match[str]) -> timezone | None:
         """Parse the time zone information from a datetime string."""
         # This is probably a bit rough-and-ready, there are good libraries
         # for this. Do we want to depend on one of them?
@@ -115,7 +115,7 @@ class DatePrefix(object):
         return self.text or ""
 
     def __repr__(self) -> str:
-        return "<DatePrefix(%r, %r)>" % (self.text, self.precision)
+        return f"<DatePrefix({self.text!r}, {self.precision!r})>"
 
     def __hash__(self) -> int:
         return hash(repr(self))

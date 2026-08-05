@@ -1,14 +1,14 @@
-from datetime import date, datetime
+from datetime import datetime
 
 from pytest import raises
 
 from prefixdate.formats import (
+    Precision,
     format_precision,
     has_two_digit_year,
-    resolve_two_digit_year,
     parse_format,
     parse_formats,
-    Precision,
+    resolve_two_digit_year,
 )
 
 

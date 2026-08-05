@@ -1,7 +1,12 @@
 version: 2
 updates:
   - package-ecosystem: pip
+    open-pull-requests-limit: 10
     directory: "/"
     schedule:
       interval: monthly
-    open-pull-requests-limit: 100
+  - package-ecosystem: "github-actions"
+    open-pull-requests-limit: 10
+    directory: "/"
+    schedule:
+      interval: monthly

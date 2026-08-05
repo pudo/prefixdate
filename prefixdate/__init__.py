@@ -1,10 +1,14 @@
-from typing import Optional, Union
+from prefixdate.formats import (
+    format_precision,
+    has_two_digit_year,
+    parse_format,
+    parse_formats,
+    resolve_two_digit_year,
+)
 from prefixdate.parse import DatePrefix, Raw
 from prefixdate.precision import Precision
-from prefixdate.formats import parse_format, parse_formats, format_precision
-from prefixdate.formats import has_two_digit_year, resolve_two_digit_year
 
-Part = Union[None, str, int]
+Part = str | int | None
 
 
 def parse(raw: Raw, precision: Precision = Precision.FULL) -> DatePrefix:
@@ -13,7 +17,7 @@ def parse(raw: Raw, precision: Precision = Precision.FULL) -> DatePrefix:
     return DatePrefix(raw, precision=precision)
 
 
-def normalize_date(raw: Raw, precision: Precision = Precision.FULL) -> Optional[str]:
+def normalize_date(raw: Raw, precision: Precision = Precision.FULL) -> str | None:
     """Take the given input date string and parse it into the normalised
     format to the precision given as an argument."""
     return parse(raw, precision=precision).text
@@ -37,13 +41,13 @@ def parse_parts(
 __all__ = [
     "DatePrefix",
     "Precision",
-    "parse",
-    "parse_parts",
-    "normalize_date",
-    "parse_format",
-    "parse_formats",
     "format_precision",
     "has_two_digit_year",
+    "normalize_date",
+    "parse",
+    "parse_format",
+    "parse_formats",
+    "parse_parts",
     "resolve_two_digit_year",
 ]
 __version__ = "0.5.0"

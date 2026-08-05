@@ -1,11 +1,11 @@
-import re
 import logging
-from typing import Iterable, Optional
+import re
+from collections.abc import Iterable
+from datetime import date, datetime
 from functools import lru_cache
-from datetime import datetime, date
 
-from prefixdate.precision import Precision
 from prefixdate.parse import DatePrefix, Raw
+from prefixdate.precision import Precision
 
 log = logging.getLogger(__name__)
 
@@ -56,7 +56,7 @@ def resolve_two_digit_year(dt: datetime, base_year: int) -> datetime:
 
 
 def parse_format(
-    raw: Raw, format: str, two_digit_year_base: Optional[int] = None
+    raw: Raw, format: str, two_digit_year_base: int | None = None
 ) -> DatePrefix:
     """Parse the given raw input using the supplied format string. The precision of the
     result is inferred from the format string.
@@ -91,7 +91,7 @@ def parse_format(
 
 
 def parse_formats(
-    raw: Raw, formats: Iterable[str], two_digit_year_base: Optional[int] = None
+    raw: Raw, formats: Iterable[str], two_digit_year_base: int | None = None
 ) -> DatePrefix:
     """Run `parse_format` using an iterable of format strings, returning the
     first non-empty result from parsing."""

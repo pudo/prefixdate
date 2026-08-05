@@ -1,6 +1,8 @@
+from datetime import UTC, datetime
+
 import pytest
-from datetime import datetime, timezone
-from prefixdate import parse, normalize_date, parse_parts, Precision
+
+from prefixdate import Precision, normalize_date, parse, parse_parts
 
 
 def test_normalize():
@@ -35,11 +37,11 @@ def test_normalize():
     assert prefix.text == text
     assert prefix.precision == Precision.SECOND
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     assert parse(now).dt == now
     assert parse(now.date()).text == now.date().isoformat()
     assert str(parse(2001)) == "2001"
-    assert repr(parse(2001)) == "<DatePrefix('2001', %r)>" % Precision.YEAR
+    assert repr(parse(2001)) == f"<DatePrefix('2001', {Precision.YEAR!r})>"
 
     # feed a prefix to parse:
     prefix = parse(now)
