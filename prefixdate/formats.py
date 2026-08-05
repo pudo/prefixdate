@@ -89,7 +89,7 @@ def parse_format(
         prefix.format = format
         return prefix
     except (ValueError, TypeError):
-        log.warning("Date %r does not match format %s", raw, format)
+        log.debug("Date %r does not match format %s", raw, format)
     return DatePrefix(None, precision=Precision.EMPTY)
 
 
