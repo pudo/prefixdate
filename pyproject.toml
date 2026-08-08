@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "prefixdate"
-version = "0.6.0"
+version = "0.6.1"
 description = "Parse and process date string of varied precision as prefixes in Python."
 readme = "README.md"
 license = "MIT"

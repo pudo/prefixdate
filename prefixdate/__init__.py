@@ -50,4 +50,4 @@ __all__ = [
     "parse_parts",
     "resolve_two_digit_year",
 ]
-__version__ = "0.6.0"
+__version__ = "0.6.1"
