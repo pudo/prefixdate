@@ -55,7 +55,7 @@ class DatePrefix:
             if isinstance(raw, DatePrefix):
                 return (raw.precision, raw.dt)
             if raw is not None:
-                log.warning("Date value is invalid: %s", raw)
+                log.debug("Date value is invalid: %s", raw)
             return (Precision.EMPTY, None)
         pcn, year = self._extract(match, "year", 1000, pcn, Precision.EMPTY)
         pcn, month = self._extract(match, "month", 1, pcn, Precision.YEAR)
@@ -68,7 +68,7 @@ class DatePrefix:
             dt = datetime(year, month, day, hour, minute, second, tzinfo=tz)
             return (pcn, dt)
         except ValueError:
-            log.warning("Date string is invalid: %s", raw)
+            log.debug("Date string is invalid: %s", raw)
             return (Precision.EMPTY, None)
 
     def _extract(
